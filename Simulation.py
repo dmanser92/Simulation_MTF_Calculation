@@ -10,7 +10,7 @@ import numpy as np
 import scipy.optimize
 
 
-# definiern von Funktionen mit dem lambda-Operator
+# Sinus function
 def sin(x):
     return np.sin(np.deg2rad(x))
 
@@ -43,18 +43,34 @@ def fit_sin(tt, yy):
     return {"amp": A, "omega": w, "phase": p, "offset": c, "freq": f, "period": 1./f, "fitfunc": fitfunc, "maxcov": np.max(pcov), "rawres": (guess,popt,pcov)}
 
 
-N = 50
+# Create Matrix of sine + Random-values
+def randmatrix(N):
+    matrix = np.zeros((N, N))
+    for i in range(0, N):
+        for j in range(0, N):
+            matrix[i][j] = F[j] + 2 * np.random.sample() - 1  # continuous uniform distribution
+    #        intensityValues[i][j] = F[j] + np.random.normal(0, 0.3)    # normal distribution (gaussian)
+    return matrix
+
+
+# Start Main Function
+N = 50  # Pixel Numbers
+A = 4
+f = 8
+phi = 0.4
+C = 5
+
 t = np.linspace(0, 10, N)
 t2 = np.linspace(0, 10, 10*N)
-F = 4*sin(2*np.pi*8*t+0.4) + 5
-intensityValues = np.zeros((N, N))
+F = A*sin(2*np.pi*f*t+phi) + C
 
-for i in range(0, N):
-    for j in range(0, N):
-        intensityValues[i][j] = F[j] + 2 * np.random.sample() - 1   # continuous uniform distribution
-#        intensityValues[i][j] = F[j] + np.random.normal(0, 0.3)    # normal distribution (gaussian)
+f_low = 8
+f_high = 100
 
+# create Matrix with randomization
+intensityValues = randmatrix(N)
 
+# Fit Sine and Plot
 res = fit_sin(t, intensityValues)
 print("Amplitude=%(amp)s, Angular freq.=%(omega)s, phase=%(phase)s, offset=%(offset)s, Max. Cov.=%(maxcov)s" % res)
 
@@ -65,4 +81,25 @@ plt.legend(loc="best")
 plt.xlabel('Pixelachse x [mm]', fontsize=12)
 plt.ylabel('Intensitätswerte der Pixel [W/m2]', fontsize=12)
 plt.title('Simulation MTF Messpunkte', fontsize=20)
+plt.show()
+
+Afit = res['amp']
+cfit = res['offset']
+Modulation_low = ((Afit+cfit)-(cfit-Afit))/((Afit+cfit)+(cfit-Afit))
+mod = np.zeros(f_high - f_low)
+
+# Calculate Modulation
+for i in range(f_low, f_high):
+    f = i
+    A = A - 0.04
+    F = A * sin(2 * np.pi * f * t + phi) + C
+    intensityValues = randmatrix(N)
+    res = fit_sin(t, intensityValues)
+    Afit = res['amp']
+    cfit = res['offset']
+    Modulation = ((Afit+cfit)-(cfit-Afit))/((Afit+cfit)+(cfit-Afit)) / Modulation_low
+    mod[i-8] = Modulation
+    print("Modulation bei f={0} ist {1}".format(f, Modulation))
+
+plt.plot(np.linspace(f_low, f_high, f_high - f_low), mod)
 plt.show()
