@@ -48,8 +48,8 @@ def randmatrix(N):
     matrix = np.zeros((N, N))
     for i in range(0, N):
         for j in range(0, N):
-            matrix[i][j] = F[j] + 2 * np.random.sample() - 1  # continuous uniform distribution
-    #        intensityValues[i][j] = F[j] + np.random.normal(0, 0.3)    # normal distribution (gaussian)
+    #        matrix[i][j] = F[j] + 1 * np.random.sample() - 0.5  # continuous uniform distribution
+            matrix[i][j] = F[j] + np.random.normal(0, 0.3)    # normal distribution (gaussian)
     return matrix
 
 
@@ -101,5 +101,10 @@ for i in range(f_low, f_high):
     mod[i-8] = Modulation
     print("Modulation bei f={0} ist {1}".format(f, Modulation))
 
+# Plot MTF
 plt.plot(np.linspace(f_low, f_high, f_high - f_low), mod)
+plt.legend(loc="best")
+plt.xlabel('Spatial Frequency [lp/mm]', fontsize=12)
+plt.ylabel('MTF', fontsize=12)
+plt.title('Simulation MTF', fontsize=20)
 plt.show()
