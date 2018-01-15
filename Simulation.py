@@ -51,7 +51,9 @@ intensityValues = np.zeros((N, N))
 
 for i in range(0, N):
     for j in range(0, N):
-        intensityValues[i][j] = F[j] + np.random.normal(0, 0.3)
+        intensityValues[i][j] = F[j] + 2 * np.random.sample() - 1   # continuous uniform distribution
+#        intensityValues[i][j] = F[j] + np.random.normal(0, 0.3)    # normal distribution (gaussian)
+
 
 res = fit_sin(t, intensityValues)
 print("Amplitude=%(amp)s, Angular freq.=%(omega)s, phase=%(phase)s, offset=%(offset)s, Max. Cov.=%(maxcov)s" % res)
